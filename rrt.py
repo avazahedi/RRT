@@ -94,8 +94,8 @@ q_near = nearest_vertex(q_rand, G)
 print(q_rand.pos, q_near.pos)
 
 
-xs = [node[0] for node in G.graph]
-ys = [node[1] for node in G.graph]
+xs = [node.pos[0] for node in G.graph]
+ys = [node.pos[1] for node in G.graph]
 plt.axis([0, 100, 0, 100])
 plt.plot(xs, ys, marker='o', markersize=7)
 plt.show()
