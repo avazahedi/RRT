@@ -63,6 +63,43 @@ class Graph:
         return self._length
 
 
+class Obstacle:
+    def __init__(self, radius, center_pos):
+        self.radius = radius
+        self.center = center_pos    # center_pos is an (x,y) tuple
+
+    # checks if there is a collision between the obstacle and the path between the two nodes
+    def collision(self, node1, node2):
+        # y-y1 = m(x-x1)
+        m = (node2.pos[1] - node1.pos[1])/(node2.pos[0] - node1.pos[0])
+        # y - node1.pos[1] = m * (x - node1.pos[0])
+
+        # perpendicular line
+        # slope = -1/m
+        # distance of line from center
+        # line is ax + by + c = 0
+        # dist = (abs(a*x + b*y + c)) / (a**2 + b**2)**0.5
+
+
+        # find perpendicular point
+        x = (self.center[0]/m + self.center[1] + m*node1.pos[0] - node1.pos[1]) / (m + 1/m)
+        y = m*(x-node1.pos[0]) + node1.pos[1]
+
+        # check if perpendicular point is between the two nodes
+        # if yes, check if collision
+        if ( 
+            (min(node1.pos[0], node2.pos[0]) < x) and 
+            (x < max(node1.pos[0], node2.pos[0]) ) and 
+            (min(node1.pos[1], node2.pos[1]) < y) and
+            (y < max(node1.pos[1], node2.pos[1])) 
+            ):
+            dist = ( (x - self.center[0])**2 + (y - self.center[1])**2 )**0.5
+            if self.radius >= dist:
+                return True
+
+        return False
+
+
 # returns q_rand = a randomly generated position in the domain (format [xmin, xmax, ymin, ymax])
 def random_configuration(domain):
     q_rand = Node((random.uniform(domain[0], domain[1]), random.uniform(domain[2], domain[3])))
@@ -101,10 +138,17 @@ G = Graph()
 start_node = Node(q_init)
 G.add_node(start_node)
 
+obs = Obstacle(10, (25,25))
+
 for i in range(K):
     q_rand = random_configuration(D)
     q_near = nearest_vertex(q_rand, G)
     q_new = new_configuration(q_near, q_rand, delta)
+
+    if (obs.collision(q_near, q_new) ==  True):
+        print('Collision!')
+        continue
+    
     G.add_node(q_new)
     G.add_edge(q_near, q_new)
 
@@ -114,6 +158,7 @@ ys = [node.pos[1] for node in G.graph]
 fig, ax = plt.subplots()
 plt.axis(D)
 plt.plot(xs, ys, marker='o', markersize=3, linestyle = 'None')
+plt.plot(obs.center[0], obs.center[1], markersize=obs.radius)
 segments = [cxn for cxn in G.cxn_pos]
 line_segments = LineCollection(segments)
 ax.add_collection(line_segments)
