@@ -1,3 +1,4 @@
+from dis import dis
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -28,7 +29,7 @@ class Node:
         return len(self.children)
 
     # finds distance between two nodes
-    def distance(self, other):
+    def get_distance(self, other):
         dist = ( (self.pos[0] - other.pos[0])**2 + (self.pos[1] - other.pos[1])**2 )**0.5
         return dist
 
@@ -61,9 +62,12 @@ start_node = Node(q_init)
 G.add_node(start_node)
 
 def nearest_vertex(self, q_rand, graph):
-    distances = []
+    distances = {}
     for node in graph:
-        pass
+        dist = node.get_distance(q_rand)
+        distances[node] = dist
+    return min(distances, key=distances.get)
+    
     
 node_vals = []  # contains all positions of nodes - graph G
 start_node = Node(q_init)
