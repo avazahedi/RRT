@@ -1,14 +1,8 @@
 from dis import dis
+from hashlib import new
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-
-# domain D = [0, 100] x [0, 100]
-D = np.zeros((100, 100))
-q_init = (50, 50)
-delta = 1
-K = 0
-
 
 class Node:
     def __init__(self, pos, children = None):
@@ -46,8 +40,8 @@ class Graph:
     
     # adds nondirected edge between node1 and node2
     def add_edge(self, node1, node2):
-        self.graph[node1].add(node2)
-        self.graph[node2].add(node1)
+        node1.children.append(node2)
+        node2.children.append(node1)
         self.connections.append((node1, node2))
 
     def remove_node(self, node):
@@ -77,25 +71,37 @@ def nearest_vertex(q_rand, graph):
 
 # returns q_new = the new node created by moving distance delta from q_near in the direction of q_rand
 def new_configuration(q_near, q_rand, delta):
-    vector = [q_rand[0] - q_near[0], q_rand[1] - q_near[1]]
+    vector = [q_rand.pos[0] - q_near.pos[0], q_rand.pos[1] - q_near.pos[1]]
     magnitude = ( vector[0]**2 + vector[1]**2 )**0.5
-    unit_vector = [x / magnitude for x in vector]
-    new_pos = (q_near[0] + unit_vector[0], q_near[1] + unit_vector[1])
+    delta_unit_vector = [delta * x / magnitude for x in vector]     # delta * unit vector
+    new_pos = (q_near.pos[0] + delta_unit_vector[0], q_near.pos[1] + delta_unit_vector[1])
     q_new = Node(new_pos)
     return q_new
     
+
+
+# domain D = [0, 100] x [0, 100]
+# [xmin, xmax, ymin, ymax]
+D = [0, 100, 0, 100]
+
+q_init = (50, 50)
+delta = 10
+K = 100
 
 G = Graph()
 start_node = Node(q_init)
 G.add_node(start_node)
 
-q_rand = Node((random.random()*100, random.random()*100))
-q_near = nearest_vertex(q_rand, G)
-print(q_rand.pos, q_near.pos)
-
+for i in range(K):
+    q_rand = Node((random.random()*100, random.random()*100))
+    q_near = nearest_vertex(q_rand, G)
+    q_new = new_configuration(q_near, q_rand, delta)
+    G.add_node(q_new)
+    G.add_edge(q_near, q_new)
 
 xs = [node.pos[0] for node in G.graph]
 ys = [node.pos[1] for node in G.graph]
-plt.axis([0, 100, 0, 100])
-plt.plot(xs, ys, marker='o', markersize=7)
+print(xs, ys)
+plt.axis(D)
+plt.plot(xs, ys, marker='o', markersize=5)
 plt.show()
