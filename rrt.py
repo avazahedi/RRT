@@ -71,8 +71,13 @@ def nearest_vertex(q_rand, graph):
     for node in graph.graph:
         dist = node.get_distance(q_rand)
         distances[node] = dist
-        q_near = min(distances, key=distances.get)
-        return q_near
+    
+    for node, dist in distances.items():
+        print(node, node.pos, dist)
+
+    q_near = min(distances, key=distances.get)
+    print(q_near.pos)
+    return q_near
 
 # returns q_new = the new node created by moving distance delta from q_near in the direction of q_rand
 def new_configuration(q_near, q_rand, delta):
@@ -99,7 +104,6 @@ G.add_node(start_node)
 
 for i in range(K):
     q_rand = random_configuration(D)
-    print(q_rand.pos)
     q_near = nearest_vertex(q_rand, G)
     q_new = new_configuration(q_near, q_rand, delta)
     G.add_node(q_new)
@@ -107,7 +111,7 @@ for i in range(K):
 
 xs = [node.pos[0] for node in G.graph]
 ys = [node.pos[1] for node in G.graph]
-print(xs, ys)
+# print(xs, ys)
 plt.axis(D)
-plt.plot(xs, ys, marker='o', markersize=5)
+plt.plot(xs, ys, marker='o', markersize=5, linestyle = 'None')
 plt.show()
