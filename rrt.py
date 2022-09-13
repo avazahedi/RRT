@@ -60,6 +60,11 @@ class Graph:
         return self._length
 
 
+# returns q_rand = a randomly generated position in the domain (format [xmin, xmax, ymin, ymax])
+def random_configuration(domain):
+    q_rand = Node((random.uniform(domain[0], domain[1]), random.uniform(domain[2], domain[3])))
+    return q_rand
+
 # returns q_near = the node that is closeset to q_rand
 def nearest_vertex(q_rand, graph):
     distances = {}
@@ -86,14 +91,15 @@ D = [0, 100, 0, 100]
 
 q_init = (50, 50)
 delta = 10
-K = 100
+K = 5
 
 G = Graph()
 start_node = Node(q_init)
 G.add_node(start_node)
 
 for i in range(K):
-    q_rand = Node((random.random()*100, random.random()*100))
+    q_rand = random_configuration(D)
+    print(q_rand.pos)
     q_near = nearest_vertex(q_rand, G)
     q_new = new_configuration(q_near, q_rand, delta)
     G.add_node(q_new)
