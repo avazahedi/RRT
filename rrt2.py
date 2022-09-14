@@ -165,6 +165,7 @@ def build_tree(num_vertices, domain, graph, delta):
     D = domain
     G = graph
 
+    # *** fix issue where if skipping a node, don't end up with less nodes (maybe do K+=1)
     for i in range(K):
         q_rand = random_configuration(D)
         q_near = nearest_vertex(q_rand, G)
@@ -173,10 +174,8 @@ def build_tree(num_vertices, domain, graph, delta):
         # check for collisions
         for obs in obs_list:
             if (obs.collision(q_near, q_new) ==  True):
-                # print('Collision!', i)
                 break   # if there is any collision, we want to skip this node
         else:   # executes if for loop did not break
-            # print('continuing', i)
             G.add_node(q_new)
             G.add_edge(q_near, q_new)
             continue
