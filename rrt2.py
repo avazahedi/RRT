@@ -3,6 +3,7 @@ from hashlib import new
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+from matplotlib.patches import Circle
 import random
 
 class Node:
@@ -93,8 +94,10 @@ class Obstacle:
             (min(node1.pos[1], node2.pos[1]) < y) and
             (y < max(node1.pos[1], node2.pos[1])) 
             ):
+            # print('between nodes')
             dist = ( (x - self.center[0])**2 + (y - self.center[1])**2 )**0.5
             if self.radius >= dist:
+                # print('collision')
                 return True
 
         return False
@@ -131,35 +134,62 @@ def new_configuration(q_near, q_rand, delta):
 D = [0, 100, 0, 100]
 
 q_init = (50, 50)
-delta = 3
-K = 500
+delta = 10
+K = 30
 
 G = Graph()
 start_node = Node(q_init)
 G.add_node(start_node)
 
-obs = Obstacle(10, (25,25))
+obs1 = Obstacle(5, (25,25))
+obs2 = Obstacle(5, (75,75))
+obs_list = []
+obs_list.append(obs1)
+obs_list.append(obs2)
 
+obs_x = [obs.center[0] for obs in obs_list]
+obs_y = [obs.center[1] for obs in obs_list]
+obs_r = [obs.radius for obs in obs_list]
+
+# expand tree
 for i in range(K):
     q_rand = random_configuration(D)
     q_near = nearest_vertex(q_rand, G)
     q_new = new_configuration(q_near, q_rand, delta)
 
-    if (obs.collision(q_near, q_new) ==  True):
-        print('Collision!')
+    # check for collisions
+    for obs in obs_list:
+        if (obs.collision(q_near, q_new) ==  True):
+            print('Collision!')
+            break   # if there is any collision, we want to skip this node
+    else:
+        print('continuing')
         continue
     
     G.add_node(q_new)
     G.add_edge(q_near, q_new)
+    print('new node + edge added')
+
 
 xs = [node.pos[0] for node in G.graph]
 ys = [node.pos[1] for node in G.graph]
 
+# creating figure
 fig, ax = plt.subplots()
 plt.axis(D)
+# plotting tree
 plt.plot(xs, ys, marker='o', markersize=3, linestyle = 'None')
-plt.plot(obs.center[0], obs.center[1], markersize=obs.radius)
+
+# plotting obstacles
+for obs in obs_list:
+    circle = Circle(obs.center, obs.radius, color='green')
+    ax.add_patch(circle)
+
+# plotting edges
 segments = [cxn for cxn in G.cxn_pos]
 line_segments = LineCollection(segments)
 ax.add_collection(line_segments)
+
+# making figure square and displaying
+plt.gca().set_aspect('equal', adjustable='box')
 plt.show()
