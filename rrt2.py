@@ -114,8 +114,16 @@ def nearest_vertex(q_rand, graph):
     for node in graph.graph:
         dist = node.get_distance(q_rand)
         distances[node] = dist
+        print(node, distances[node])
 
-    q_near = min(distances, key=distances.get)
+    # q_near = min(distances, key=distances.get)
+    min_dist = min(distances.values())
+    print(min_dist)
+    for key, value in distances.items():
+        if value == min_dist:
+            q_near = key
+
+    print(q_near)
     return q_near
 
 # returns q_new = the new node created by moving distance delta from q_near in the direction of q_rand
@@ -132,10 +140,9 @@ def new_configuration(q_near, q_rand, delta):
 # domain D = [0, 100] x [0, 100]
 # [xmin, xmax, ymin, ymax]
 D = [0, 100, 0, 100]
-
 q_init = (50, 50)
-delta = 10
-K = 30
+delta = 5
+K = 300
 
 G = Graph()
 start_node = Node(q_init)
@@ -151,24 +158,32 @@ obs_x = [obs.center[0] for obs in obs_list]
 obs_y = [obs.center[1] for obs in obs_list]
 obs_r = [obs.radius for obs in obs_list]
 
-# expand tree
-for i in range(K):
-    q_rand = random_configuration(D)
-    q_near = nearest_vertex(q_rand, G)
-    q_new = new_configuration(q_near, q_rand, delta)
 
-    # check for collisions
-    for obs in obs_list:
-        if (obs.collision(q_near, q_new) ==  True):
-            print('Collision!')
-            break   # if there is any collision, we want to skip this node
-    else:
-        print('continuing')
-        continue
-    
-    G.add_node(q_new)
-    G.add_edge(q_near, q_new)
-    print('new node + edge added')
+# build tree into graph given K, D, G, and delta
+def build_tree(num_vertices, domain, graph, delta):
+    K = num_vertices
+    D = domain
+    G = graph
+
+    for i in range(K):
+        q_rand = random_configuration(D)
+        q_near = nearest_vertex(q_rand, G)
+        q_new = new_configuration(q_near, q_rand, delta)
+
+        # check for collisions
+        for obs in obs_list:
+            if (obs.collision(q_near, q_new) ==  True):
+                # print('Collision!', i)
+                break   # if there is any collision, we want to skip this node
+        else:   # executes if for loop did not break
+            # print('continuing', i)
+            G.add_node(q_new)
+            G.add_edge(q_near, q_new)
+            continue
+
+    return G
+
+G = build_tree(K, D, G, delta)
 
 
 xs = [node.pos[0] for node in G.graph]
