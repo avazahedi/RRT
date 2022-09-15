@@ -71,20 +71,19 @@ class Obstacle:
 
     # checks if there is a collision between the obstacle and the path between the two nodes
     def collision(self, node1, node2):
-        # y-y1 = m(x-x1)
+        # slope of line btw nodes
         m = (node2.pos[1] - node1.pos[1])/(node2.pos[0] - node1.pos[0])
-        # y - node1.pos[1] = m * (x - node1.pos[0])
-
-        # perpendicular line
-        # slope = -1/m
-        # distance of line from center
-        # line is ax + by + c = 0
-        # dist = (abs(a*x + b*y + c)) / (a**2 + b**2)**0.5
-
 
         # find perpendicular point
         x = (self.center[0]/m + self.center[1] + m*node1.pos[0] - node1.pos[1]) / (m + 1/m)
         y = m*(x-node1.pos[0]) + node1.pos[1]
+
+
+        # check if either node is inside the obstacle
+        nodes = [node1, node2]
+        for node in nodes:
+            if (node.pos[0] - self.center[0])**2 + (node.pos[1] - self.center[1])**2 <= self.radius**2:
+                return True
 
         # check if perpendicular point is between the two nodes
         # if yes, check if collision
@@ -114,16 +113,16 @@ def nearest_vertex(q_rand, graph):
     for node in graph.graph:
         dist = node.get_distance(q_rand)
         distances[node] = dist
-        print(node, distances[node])
+        # print(node, distances[node])
 
     # q_near = min(distances, key=distances.get)
     min_dist = min(distances.values())
-    print(min_dist)
+    # print(min_dist)
     for key, value in distances.items():
         if value == min_dist:
             q_near = key
 
-    print(q_near)
+    # print(q_near)
     return q_near
 
 # returns q_new = the new node created by moving distance delta from q_near in the direction of q_rand
@@ -142,7 +141,7 @@ def new_configuration(q_near, q_rand, delta):
 D = [0, 100, 0, 100]
 q_init = (50, 50)
 delta = 5
-K = 300
+K = 500
 
 G = Graph()
 start_node = Node(q_init)
@@ -166,7 +165,9 @@ def build_tree(num_vertices, domain, graph, delta):
     G = graph
 
     # *** fix issue where if skipping a node, don't end up with less nodes (maybe do K+=1)
-    for i in range(K):
+    # for i in range(K):
+    i = 0
+    while i <= K:
         q_rand = random_configuration(D)
         q_near = nearest_vertex(q_rand, G)
         q_new = new_configuration(q_near, q_rand, delta)
@@ -178,6 +179,7 @@ def build_tree(num_vertices, domain, graph, delta):
         else:   # executes if for loop did not break
             G.add_node(q_new)
             G.add_edge(q_near, q_new)
+            i += 1
             continue
 
     return G
