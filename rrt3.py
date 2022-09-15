@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
+import matplotlib.image as mpimg
 import random
 
 class Node:
@@ -141,7 +142,7 @@ def new_configuration(q_near, q_rand, delta):
 D = [0, 100, 0, 100]
 q_init = (50, 50)
 delta = 5
-K = 500
+K = 200
 
 G = Graph()
 start_node = Node(q_init)
@@ -191,6 +192,11 @@ ys = [node.pos[1] for node in G.graph]
 # creating figure
 fig, ax = plt.subplots()
 plt.axis(D)
+
+# display image map in background
+img = mpimg.imread('/home/avaz/Downloads/N_map.png')
+ax.imshow(img)
+
 # plotting tree
 plt.plot(xs, ys, marker='o', markersize=3, linestyle = 'None')
 
